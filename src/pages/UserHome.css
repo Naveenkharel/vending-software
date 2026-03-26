@@ -1,0 +1,267 @@
+.user-home {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: Arial, sans-serif;
+  opacity: 0;
+  animation: fadeIn 1s ease-in forwards;
+  padding-bottom: 100px;
+}
+
+.user-home h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #2d5016;
+  font-size: 2.5rem;
+}
+
+/* ── Loading state ── */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  color: #2d5016;
+  opacity: 1; /* override the parent fade-in for this state */
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid #e2e8f0;
+  border-top: 5px solid #4a7c59;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ── Empty inventory ── */
+.empty-inventory {
+  text-align: center;
+  padding: 60px 20px;
+  color: #718096;
+  font-size: 1.1rem;
+}
+
+/* ── Items grid ── */
+.items-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 25px;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeInUp 1s ease-out 0.3s forwards;
+  opacity: 0;
+}
+
+.item-box {
+  width: 320px;
+  padding: 20px;
+  border: 2px solid #4a7c59;
+  border-radius: 15px;
+  background-color: #f9fff9;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  transition: transform 0.2s;
+  animation: fadeInScale 0.5s ease-out forwards;
+  opacity: 0;
+}
+
+/* Staggered entrance for up to 9 cards */
+.item-box:nth-child(1) { animation-delay: 0.4s; }
+.item-box:nth-child(2) { animation-delay: 0.5s; }
+.item-box:nth-child(3) { animation-delay: 0.6s; }
+.item-box:nth-child(4) { animation-delay: 0.7s; }
+.item-box:nth-child(5) { animation-delay: 0.8s; }
+.item-box:nth-child(6) { animation-delay: 0.9s; }
+.item-box:nth-child(7) { animation-delay: 1.0s; }
+.item-box:nth-child(8) { animation-delay: 1.1s; }
+.item-box:nth-child(9) { animation-delay: 1.2s; }
+
+.item-box:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+}
+
+/* ── Product image ── */
+.image-container {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  background: #e8f5e8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.seed-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.seed-image:hover { transform: scale(1.05); }
+
+/* NEW: placeholder when no image is set */
+.no-image-placeholder {
+  font-size: 4rem;
+  opacity: 0.5;
+}
+
+/* ── Product name ── */
+.item-box h3 {
+  margin: 0 0 8px 0;
+  color: #2d5016;
+  font-size: 1.3rem;
+  min-height: 3em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── NEW: price tag ── */
+.item-price-tag {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #38a169;
+  margin-bottom: 8px;
+}
+
+/* ── NEW: stock badge ── */
+.stock-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.stock-badge.stock-ok  { background: #c6f6d5; color: #22543d; }
+.stock-badge.stock-max { background: #fed7d7; color: #742a2a; }
+
+/* ── Quantity controls ── */
+.quantity-form { margin: 12px 0; }
+
+.quantity-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
+
+.quantity-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 20px;
+  border: 2px solid #4a7c59;
+  background-color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.quantity-btn:hover:not(:disabled) {
+  background-color: #4a7c59;
+  color: white;
+}
+
+/* NEW: disabled state for + button at max stock */
+.quantity-btn:disabled {
+  border-color: #cbd5e0;
+  color: #cbd5e0;
+  cursor: not-allowed;
+  background: white;
+}
+
+.quantity-input {
+  width: 70px;
+  height: 40px;
+  text-align: center;
+  font-size: 18px;
+  border: 2px solid #4a7c59;
+  border-radius: 5px;
+}
+
+.quantity-input:focus {
+  outline: none;
+  border-color: #2d5016;
+  box-shadow: 0 0 5px rgba(45, 80, 22, 0.3);
+}
+
+.item-box p {
+  margin-top: 10px;
+  color: #666;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 8px;
+  background-color: #e8f5e8;
+  border-radius: 5px;
+}
+
+/* ── Bottom fade gradient ── */
+.user-home::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: linear-gradient(to top, rgba(255,255,255,0.9), transparent);
+  pointer-events: none;
+  z-index: 999;
+}
+
+/* ── Blur overlay when confirm page is open ── */
+.content-container { transition: filter 0.3s ease; }
+.content-container.blurred { filter: blur(3px); pointer-events: none; }
+
+.user-home::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  display: none;
+}
+
+.user-home:has(.content-container.blurred)::before { display: block; }
+
+/* ── Animations ── */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.9); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .item-box { width: 280px; }
+  .image-container { height: 180px; }
+}
+
+@media (max-width: 480px) {
+  .item-box { width: 100%; max-width: 350px; }
+  .image-container { height: 220px; }
+}
