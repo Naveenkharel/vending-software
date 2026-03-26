@@ -1,34 +1,20 @@
-// src/backend/seed-data/inventoryService.js
+// backend/SeedData/InventoryService.js
 import { db } from './firebase-config';
 import { 
-  collection, 
-  doc, 
-  getDocs, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  query, 
-  orderBy 
+  collection, doc, getDocs, getDoc,
+  addDoc, updateDoc, deleteDoc, query, orderBy 
 } from 'firebase/firestore';
 
-// Reference to the inventory collection
 const inventoryCollection = collection(db, 'inventory');
 
-// Get all inventory items from Firebase
 export const getAllInventory = async () => {
   try {
     const q = query(inventoryCollection, orderBy('slot'));
     const querySnapshot = await getDocs(q);
     const inventory = [];
-    
     querySnapshot.forEach((doc) => {
-      inventory.push({
-        id: doc.id, // Firebase document ID
-        ...doc.data()
-      });
+      inventory.push({ id: doc.id, ...doc.data() });
     });
-    
     return inventory;
   } catch (error) {
     console.error('Error getting inventory:', error);
@@ -36,27 +22,18 @@ export const getAllInventory = async () => {
   }
 };
 
-// Get a single inventory item by ID
 export const getInventoryItem = async (id) => {
   try {
     const docRef = doc(db, 'inventory', id);
     const docSnap = await getDoc(docRef);
-    
-    if (docSnap.exists()) {
-      return {
-        id: docSnap.id,
-        ...docSnap.data()
-      };
-    } else {
-      throw new Error('No such document!');
-    }
+    if (docSnap.exists()) return { id: docSnap.id, ...docSnap.data() };
+    throw new Error('No such document!');
   } catch (error) {
     console.error('Error getting item:', error);
     throw error;
   }
 };
 
-// Add a new inventory item to Firebase
 export const addInventoryItem = async (itemData) => {
   try {
     const docRef = await addDoc(inventoryCollection, {
@@ -64,41 +41,27 @@ export const addInventoryItem = async (itemData) => {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     });
-    
-    return {
-      id: docRef.id,
-      ...itemData
-    };
+    return { id: docRef.id, ...itemData };
   } catch (error) {
     console.error('Error adding item:', error);
     throw error;
   }
 };
 
-// Update an existing inventory item
 export const updateInventoryItem = async (id, itemData) => {
   try {
     const docRef = doc(db, 'inventory', id);
-    await updateDoc(docRef, {
-      ...itemData,
-      updatedAt: new Date().toISOString()
-    });
-    
-    return {
-      id,
-      ...itemData
-    };
+    await updateDoc(docRef, { ...itemData, updatedAt: new Date().toISOString() });
+    return { id, ...itemData };
   } catch (error) {
     console.error('Error updating item:', error);
     throw error;
   }
 };
 
-// Delete an inventory item
 export const deleteInventoryItem = async (id) => {
   try {
-    const docRef = doc(db, 'inventory', id);
-    await deleteDoc(docRef);
+    await deleteDoc(doc(db, 'inventory', id));
     return true;
   } catch (error) {
     console.error('Error deleting item:', error);
@@ -106,20 +69,34 @@ export const deleteInventoryItem = async (id) => {
   }
 };
 
-// Clear all inventory items
 export const clearAllInventory = async () => {
   try {
     const querySnapshot = await getDocs(inventoryCollection);
-    const deletePromises = [];
-    
-    querySnapshot.forEach((doc) => {
-      deletePromises.push(deleteDoc(doc.ref));
-    });
-    
-    await Promise.all(deletePromises);
+    await Promise.all(querySnapshot.docs.map(doc => deleteDoc(doc.ref)));
     return true;
   } catch (error) {
     console.error('Error clearing inventory:', error);
+    throw error;
+  }
+};
+
+// NEW ── reduces stock after a successful order
+export const decreaseQuantity = async (id, amountToDecrease) => {
+  try {
+    const docRef = doc(db, 'inventory', id);
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) throw new Error('Item not found');
+
+    const currentQty = parseInt(docSnap.data().quantity) || 0;
+    const newQty = Math.max(0, currentQty - amountToDecrease);
+
+    await updateDoc(docRef, {
+      quantity: newQty,
+      updatedAt: new Date().toISOString()
+    });
+    return newQty;
+  } catch (error) {
+    console.error('Error decreasing quantity:', error);
     throw error;
   }
 };
