@@ -1,3 +1,4 @@
+// Updated UserHome.jsx (with payment method support)
 import React, { useState, useEffect } from 'react';
 import './UserHome.css';
 import PlaceOrder from '../Components/PlaceOrder';
@@ -33,7 +34,6 @@ const ImageCarousel = ({ images, name }) => {
           <button className="carousel-btn carousel-prev" onClick={prev}>‹</button>
           <button className="carousel-btn carousel-next" onClick={next}>›</button>
 
-          {/* Dot indicators */}
           <div className="carousel-dots">
             {images.map((_, i) => (
               <span
@@ -63,7 +63,6 @@ const UserHome = () => {
       setLoading(true);
       const inventory = await getAllInventory();
 
-      // Show ALL slots — even out-of-stock ones
       const mapped = inventory.map(item => ({
         id: item.id,
         slot: item.slot,
@@ -121,28 +120,24 @@ const UserHome = () => {
     setShowConfirmPage(true);
   };
 
-  // ── Decrease stock in Firestore after payment ──
-  const handleProceedPayment = async (confirmedItems) => {
+  // Decrease stock in Firestore after successful payment
+  const handleProceedPayment = async (confirmedItems, paymentMethod, totalAmount) => {
     try {
-      // Decrease each ordered item's quantity in the database
       await Promise.all(
         confirmedItems.map(item =>
           decreaseQuantity(item.id, parseInt(item.quantity) || 0)
         )
       );
 
-      const total = confirmedItems.reduce(
-        (sum, item) => sum + item.price * (parseInt(item.quantity) || 0), 0
-      );
-      alert(`Order placed! Total: Rs. ${total.toFixed(2)}`);
+      // Show payment success message with method
+      alert(`✅ Payment Successful!\n\nMethod: ${paymentMethod.toUpperCase()}\nTotal: Rs. ${totalAmount.toFixed(2)}\n\nThank you for your purchase!`);
 
-      // Reset quantities and reload fresh stock from DB
       setShowConfirmPage(false);
       await loadInventory();
 
     } catch (error) {
       console.error('Error updating stock:', error);
-      alert('Order placed but stock update failed. Please inform admin.');
+      alert('⚠️ Payment processed but stock update failed. Please inform admin.');
       setShowConfirmPage(false);
     }
   };
@@ -164,7 +159,7 @@ const UserHome = () => {
     return (
       <div className="user-home">
         <h1>Seeds Vending Machine</h1>
-        <p className="empty-inventory">No products available right now.</p>
+        <p className="empty-inventory">No products available right down.</p>
       </div>
     );
   }
@@ -181,14 +176,10 @@ const UserHome = () => {
 
             return (
               <div key={item.id} className={`item-box ${!item.inStock ? 'item-box--oos' : ''}`}>
-
-                {/* Swipeable carousel */}
                 <ImageCarousel images={item.images} name={item.name} />
-
                 <h3>{item.name}</h3>
                 <div className="item-price-tag">Rs. {item.price.toFixed(2)}</div>
 
-                {/* Stock badge */}
                 {item.inStock ? (
                   <div className={`stock-badge ${atMax ? 'stock-max' : 'stock-ok'}`}>
                     {atMax
@@ -199,7 +190,6 @@ const UserHome = () => {
                   <div className="stock-badge stock-oos">Out of Stock</div>
                 )}
 
-                {/* Quantity controls — disabled entirely if out of stock */}
                 <div className="quantity-form">
                   <div className="quantity-controls">
                     <button

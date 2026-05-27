@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
+import PaymentMethod from "./PaymentMethod";
 import "./ConfirmPage.css";
 
 const ConfirmPage = ({ items, onConfirm, onCancel, onClose }) => {
-  const [shouldRender, setShouldRender] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+  const [showPaymentMethod, setShowPaymentMethod] = useState(false);
 
   const selectedItems = items.filter(item => (parseInt(item.quantity) || 0) > 0);
   
@@ -11,44 +12,38 @@ const ConfirmPage = ({ items, onConfirm, onCancel, onClose }) => {
     return sum + (item.price * (parseInt(item.quantity) || 0));
   }, 0);
 
+  const grandTotal = totalPrice * 1.1;
+
   useEffect(() => {
-    // When component mounts, trigger the animation
-    setShouldRender(true);
-    
-    // Small delay to trigger CSS animation
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 10);
-    
+    const timer = setTimeout(() => setIsVisible(true), 10);
     return () => clearTimeout(timer);
   }, []);
 
-  const handleProceedPayment = () => {
-    if (onConfirm) {
-      onConfirm(selectedItems);
-    }
+  const handleProceedToPayment = () => {
+    setShowPaymentMethod(true);
   };
 
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel();
-    }
+  const handlePaymentComplete = (method, amount) => {
+    setShowPaymentMethod(false);
+    setIsVisible(false);
+    setTimeout(() => {
+      if (onConfirm) {
+        onConfirm(selectedItems, method, amount);
+      }
+    }, 300);
   };
 
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    }
+  const handleBackFromPayment = () => {
+    setShowPaymentMethod(false);
   };
 
-  // Handle fade out when closing
   const handleCloseWithAnimation = () => {
     setIsVisible(false);
     setTimeout(() => {
       if (onClose) {
         onClose();
       }
-    }, 300); // Match this with CSS animation duration
+    }, 300);
   };
 
   const handleCancelWithAnimation = () => {
@@ -60,27 +55,22 @@ const ConfirmPage = ({ items, onConfirm, onCancel, onClose }) => {
     }, 300);
   };
 
-  if (!shouldRender) {
+  if (selectedItems.length === 0) {
     return null;
   }
 
   return (
-    <div className={`confirm-page-overlay ${isVisible ? 'visible' : ''}`}>
-      <div className="confirm-page-container">
-       
-        <div className="confirm-header">
-          <h2 className="confirm-title">Order Summary</h2>
-          <button className="close-button" onClick={handleCloseWithAnimation}>×</button>
-        </div>
-        
-        <div className="selected-items-section">
-          <h3 className="selected-items-title">
-            Selected Items 
-          </h3>
+    <>
+      <div className={`confirm-page-overlay ${isVisible ? 'visible' : ''}`}>
+        <div className="confirm-page-container">
+          <div className="confirm-header">
+            <h2 className="confirm-title">Order Summary</h2>
+            <button className="close-button" onClick={handleCloseWithAnimation}>×</button>
+          </div>
           
-          {selectedItems.length === 0 ? (
-            <p className="no-items-message">No items selected</p>
-          ) : (
+          <div className="selected-items-section">
+            <h3 className="selected-items-title">Selected Items</h3>
+            
             <div className="items-list">
               <div className="list-header">
                 <span className="header-number">#</span>
@@ -97,42 +87,40 @@ const ConfirmPage = ({ items, onConfirm, onCancel, onClose }) => {
                     <span className="item-number">{index + 1}.</span>
                     <span className="item-name">{item.name}</span>
                     <span className="item-quantity">{item.quantity}</span>
-                    <span className="item-price">${item.price.toFixed(2)}</span>
-                    <span className="item-total">${itemTotal.toFixed(2)}</span>
+                    <span className="item-price">Rs. {item.price.toFixed(2)}</span>
+                    <span className="item-total">Rs. {itemTotal.toFixed(2)}</span>
                   </div>
                 );
               })}
             </div>
-          )}
-        </div>
-        
-        {selectedItems.length > 0 && (
+          </div>
+          
           <div className="total-section">
             <div className="total-line grand-total">
               <span>Grand Total:</span>
-              <span>${(totalPrice * 1.1).toFixed(2)}</span>
+              <span>Rs. {grandTotal.toFixed(2)}</span>
             </div>
           </div>
-        )}
-        
-        <div className="action-buttons">
-          <button 
-            className="cancel-button" 
-            onClick={handleCancelWithAnimation}
-          >
-            Back to Shopping
-          </button>
           
-          <button 
-            className="proceed-payment-button" 
-            onClick={handleProceedPayment}
-            disabled={selectedItems.length === 0}
-          >
-            Proceed to Payment 
-          </button>
+          <div className="action-buttons">
+            <button className="cancel-button" onClick={handleCancelWithAnimation}>
+              Back to Shopping
+            </button>
+            <button className="proceed-payment-button" onClick={handleProceedToPayment}>
+              Proceed to Payment
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+
+      {showPaymentMethod && (
+        <PaymentMethod
+          totalAmount={grandTotal}
+          onPaymentComplete={handlePaymentComplete}
+          onBack={handleBackFromPayment}
+        />
+      )}
+    </>
   );
 };
 

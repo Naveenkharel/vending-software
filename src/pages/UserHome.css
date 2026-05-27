@@ -169,6 +169,37 @@
 }
 .user-home:has(.content-container.blurred)::before { display: block; }
 
+/* FIXES - Add this at the very end of your UserHome.css file */
+
+/* Remove the problematic dark overlay */
+.user-home::before {
+  display: none !important;
+}
+
+/* Ensure proper z-index for modals */
+.confirm-page-overlay {
+  z-index: 2000 !important;
+}
+
+.payment-overlay {
+  z-index: 2100 !important;
+}
+
+/* Keep blur effect but ensure modals work */
+.content-container {
+  transition: filter 0.3s ease;
+}
+
+.content-container.blurred {
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+/* Ensure PlaceOrder bar doesn't get blurred */
+.Place-Order-Bar {
+  z-index: 100;
+  position: fixed;
+}
 /* ── Animations ── */
 @keyframes spin        { to { transform: rotate(360deg); } }
 @keyframes fadeIn      { from { opacity: 0; } to { opacity: 1; } }
