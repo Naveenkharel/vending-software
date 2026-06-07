@@ -270,7 +270,7 @@ const AdminHome = () => {
                     </td>
                     <td className="actions">
                       <button onClick={() => handleEditClick(slot)} className="edit-btn">
-                        {slot.name ? '✏️ Edit' : '➕ Add'}
+                        {slot.name ? 'Edit' : ' Add'}
                       </button>
                       {(slot.name || slot.id) && (
                         <button onClick={() => handleClearSlot(slot)} className="clear-btn">🗑️ Clear</button>
@@ -349,7 +349,7 @@ const AdminHome = () => {
 
               <div className="form-actions">
                 <button onClick={handleSave} className="save-btn" disabled={uploadingImage}>
-                  {uploadingImage ? `⏳ ${uploadProgress}%` : '💾 Save to Firebase'}
+                  {uploadingImage ? ` ${uploadProgress}%` : ' Save to Firebase'}
                 </button>
                 <button onClick={handleCancel} className="cancel-btn" disabled={uploadingImage}>Cancel</button>
               </div>

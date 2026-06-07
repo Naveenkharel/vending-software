@@ -145,7 +145,7 @@
 
 .form-hint { display: block; color: #718096; font-size: 0.83rem; margin-top: 6px; }
 
-/* ===== 4-IMAGE GRID ===== */
+
 .four-image-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -181,7 +181,7 @@
 }
 .remove-img-btn:hover { background: rgba(229,62,62,0.85); }
 
-/* ===== UPLOAD PROGRESS BAR ===== */
+
 .upload-progress-bar {
   position: relative; height: 28px; background: #e2e8f0;
   border-radius: 14px; overflow: hidden; margin: 16px 0;
