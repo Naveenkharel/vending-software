@@ -1,4 +1,3 @@
-// src/pages/PaymentSuccess.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { verifyEsewaPayment, getDispenseStatus } from '../services/esewaService';
@@ -7,7 +6,7 @@ import './PaymentSuccess.css';
 const DISPENSE_LABELS = {
   queued:     { icon: '⏳', text: 'Order queued — machine is preparing…',  color: '#744210', bg: '#fefcbf' },
   dispensing: { icon: '⚙️',  text: 'Dispensing your items now!',             color: '#2b6cb0', bg: '#ebf8ff' },
-  dispensed:  { icon: '✅', text: 'Your items have been dispensed. Enjoy!', color: '#22543d', bg: '#c6f6d5' },
+  dispensed:  { icon: '✅', text: 'All items dispensed. Enjoy!',            color: '#22543d', bg: '#c6f6d5' },
   failed:     { icon: '⚠️', text: 'Dispense failed — please see staff.',    color: '#742a2a', bg: '#fed7d7' },
 };
 
@@ -21,7 +20,7 @@ const PaymentSuccess = () => {
   const [transactionId,  setTransactionId]  = useState('');
   const [orderItems,     setOrderItems]     = useState([]);
   const [totalAmount,    setTotalAmount]    = useState(0);
-  const [debugInfo,      setDebugInfo]      = useState(''); // shows error detail
+  const [debugInfo,      setDebugInfo]      = useState('');
 
   const pollRef = useRef(null);
 
@@ -44,60 +43,44 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const verify = async () => {
-      // ── Step 1: Get the ?data= param eSewa appended to the URL ──
       const encodedData = searchParams.get('data');
 
       if (!encodedData) {
         setStage('failed');
         setMessage('No payment data in URL.');
-        setDebugInfo('eSewa did not append ?data= to the redirect. This usually means payment was cancelled or eSewa hit the failure_url instead.');
+        setDebugInfo('eSewa did not append ?data= to the redirect.');
         return;
       }
 
-      // ── Step 2: Get orderId from sessionStorage ──
       let pending = {};
-      try {
-        pending = JSON.parse(sessionStorage.getItem('pendingOrder') || '{}');
-      } catch {
-        pending = {};
-      }
+      try { pending = JSON.parse(sessionStorage.getItem('pendingOrder') || '{}'); } catch {}
 
-      const orderId = pending.orderId;
-
+      // Fallback: extract orderId from the encoded data if sessionStorage is empty
+      let orderId = pending.orderId;
       if (!orderId) {
-        // Try to extract orderId from the encoded data itself as fallback
         try {
           const decoded = JSON.parse(atob(encodedData));
-          const fallbackOrderId = decoded.transaction_uuid;
-          if (fallbackOrderId) {
-            await runVerification(encodedData, fallbackOrderId, pending);
-            return;
-          }
+          orderId = decoded.transaction_uuid;
         } catch {}
+      }
 
+      if (!orderId) {
         setStage('failed');
-        setMessage('Session expired or order not found.');
-        setDebugInfo('sessionStorage did not have pendingOrder. This happens if the user opened PaymentSuccess in a new tab or cleared storage.');
+        setMessage('Session expired. Please contact support.');
         return;
       }
 
-      await runVerification(encodedData, orderId, pending);
-    };
-
-    const runVerification = async (encodedData, orderId, pending) => {
       try {
         const result = await verifyEsewaPayment(encodedData, orderId);
 
         if (result.success) {
           let decoded = {};
           try { decoded = JSON.parse(atob(encodedData)); } catch {}
-
           setTransactionId(decoded.transaction_uuid || orderId);
           setOrderItems(pending.items      || []);
           setTotalAmount(pending.totalAmount || 0);
           sessionStorage.removeItem('pendingOrder');
           setStage('success');
-          setMessage('Payment verified! Your order is being dispensed.');
           startPolling(orderId);
         } else {
           setStage('failed');
@@ -105,7 +88,6 @@ const PaymentSuccess = () => {
           setDebugInfo(JSON.stringify(result, null, 2));
         }
       } catch (err) {
-        console.error('Verification error:', err);
         setStage('failed');
         setMessage('Could not reach verification server.');
         setDebugInfo(err.message);
@@ -117,11 +99,13 @@ const PaymentSuccess = () => {
   }, []);
 
   const dispInfo = DISPENSE_LABELS[dispenseStatus] || DISPENSE_LABELS.queued;
+  const isTerminal = dispenseStatus === 'dispensed' || dispenseStatus === 'failed';
 
   return (
     <div className="payment-result-page">
       <div className={`payment-result-card ${stage}`}>
 
+        {/* ── Verifying ── */}
         {stage === 'verifying' && (
           <>
             <div className="result-spinner"></div>
@@ -130,22 +114,26 @@ const PaymentSuccess = () => {
           </>
         )}
 
+        {/* ── Success ── */}
         {stage === 'success' && (
           <>
             <div className="result-icon success-icon">✓</div>
             <h2>Payment Successful!</h2>
+
             {transactionId && (
               <p className="txn-id">Txn ID: <strong>{transactionId}</strong></p>
             )}
 
+            {/* Dispense status banner */}
             <div className="dispense-banner" style={{ background: dispInfo.bg, color: dispInfo.color }}>
               <span className="dispense-icon">{dispInfo.icon}</span>
               <span>{dispInfo.text}</span>
-              {(dispenseStatus === 'queued' || dispenseStatus === 'dispensing') && (
+              {!isTerminal && (
                 <div className="dispense-spinner" style={{ borderTopColor: dispInfo.color }}></div>
               )}
             </div>
 
+            {/* Order summary */}
             {orderItems.length > 0 && (
               <div className="order-summary-box">
                 <h4>Your Order</h4>
@@ -162,17 +150,20 @@ const PaymentSuccess = () => {
               </div>
             )}
 
-            {dispenseStatus === 'dispensed' && (
-              <button className="result-btn" onClick={() => navigate('/')}>Back to Store</button>
-            )}
+            {/* Always show back button — user shouldn't be stuck */}
+            <button className="result-btn" onClick={() => navigate('/')}>
+              {dispenseStatus === 'dispensed' ? 'Back to Store' : 'Back to Store'}
+            </button>
+
             {dispenseStatus === 'failed' && (
-              <p style={{ color: '#742a2a', marginTop: 8 }}>
-                Please show your Transaction ID to staff.
+              <p style={{ color: '#742a2a', marginTop: 8, fontSize: '13px' }}>
+                Please show your Transaction ID to staff for manual dispensing.
               </p>
             )}
           </>
         )}
 
+        {/* ── Failed ── */}
         {stage === 'failed' && (
           <>
             <div className="result-icon fail-icon">✕</div>

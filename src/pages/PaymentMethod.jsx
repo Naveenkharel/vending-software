@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import './PaymentMethod.css';
 import { initiateEsewaPayment, submitEsewaForm } from '../services/esewaService';
 
-const PaymentMethod = ({ totalAmount, subtotal, taxAmount, items, onPaymentComplete, onBack }) => {
-  const [isVisible,       setIsVisible]       = useState(false);
-  const [selectedMethod,  setSelectedMethod]  = useState(null);
-  const [isProcessing,    setIsProcessing]    = useState(false);
-  const [error,           setError]           = useState('');
+const PaymentMethod = ({ totalAmount, items, onPaymentComplete, onBack }) => {
+  const [isVisible,      setIsVisible]      = useState(false);
+  const [selectedMethod, setSelectedMethod] = useState(null);
+  const [isProcessing,   setIsProcessing]   = useState(false);
+  const [error,          setError]          = useState('');
 
   useEffect(() => {
     const t = setTimeout(() => setIsVisible(true), 10);
@@ -25,14 +25,12 @@ const PaymentMethod = ({ totalAmount, subtotal, taxAmount, items, onPaymentCompl
 
     if (selectedMethod === 'esewa') {
       try {
-        // CHANGE: pass subtotal and taxAmount separately so server can store both;
-        // also receive orderId back for the PaymentSuccess page to use
+        // No tax — pass 0 as taxAmount, full price as amount
         const { success, paymentData, paymentUrl, orderId, message } =
-          await initiateEsewaPayment(subtotal, taxAmount, items);
+          await initiateEsewaPayment(totalAmount, 0, items);
 
         if (!success) throw new Error(message || 'Could not initiate payment');
 
-        // Store orderId in sessionStorage so PaymentSuccess can send it to server
         sessionStorage.setItem('pendingOrder', JSON.stringify({
           orderId,
           items,
@@ -40,7 +38,7 @@ const PaymentMethod = ({ totalAmount, subtotal, taxAmount, items, onPaymentCompl
           method: 'esewa',
         }));
 
-        submitEsewaForm(paymentData, paymentUrl); // navigates away — no code runs after this
+        submitEsewaForm(paymentData, paymentUrl);
       } catch (err) {
         console.error('eSewa error:', err);
         setError(err.message || 'Payment initiation failed. Please try again.');
@@ -76,7 +74,6 @@ const PaymentMethod = ({ totalAmount, subtotal, taxAmount, items, onPaymentCompl
         )}
 
         <div className="payment-options">
-          {/* eSewa */}
           <div
             className={`payment-option ${selectedMethod === 'esewa' ? 'selected' : ''}`}
             onClick={() => { setSelectedMethod('esewa'); setError(''); }}
@@ -95,7 +92,6 @@ const PaymentMethod = ({ totalAmount, subtotal, taxAmount, items, onPaymentCompl
             </div>
           </div>
 
-          {/* Khalti placeholder */}
           <div className="payment-option" style={{ opacity: 0.45, pointerEvents: 'none' }}>
             <div className="payment-option-radio"><div className="radio-circle"></div></div>
             <div className="payment-option-logo">

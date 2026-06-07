@@ -3,13 +3,15 @@ import PaymentMethod from "./PaymentMethod";
 import "./ConfirmPage.css";
 
 const ConfirmPage = ({ items, onConfirm, onCancel, onClose }) => {
-  const [isVisible,          setIsVisible]          = useState(false);
-  const [showPaymentMethod,  setShowPaymentMethod]  = useState(false);
+  const [isVisible,         setIsVisible]         = useState(false);
+  const [showPaymentMethod, setShowPaymentMethod] = useState(false);
 
   const selectedItems = items.filter(item => (parseInt(item.quantity) || 0) > 0);
-  const subtotal      = selectedItems.reduce((s, i) => s + i.price * (parseInt(i.quantity) || 0), 0);
-  const tax           = parseFloat((subtotal * 0.1).toFixed(2));
-  const grandTotal    = parseFloat((subtotal + tax).toFixed(2));
+
+  // No tax — price is MRP
+  const total = selectedItems.reduce(
+    (s, i) => s + i.price * (parseInt(i.quantity) || 0), 0
+  );
 
   useEffect(() => {
     const t = setTimeout(() => setIsVisible(true), 10);
@@ -57,15 +59,9 @@ const ConfirmPage = ({ items, onConfirm, onCancel, onClose }) => {
           </div>
 
           <div className="total-section">
-            <div className="subtotal-line">
-              <span>Subtotal</span><span>Rs. {subtotal.toFixed(2)}</span>
-            </div>
-            <div className="subtotal-line">
-              <span>VAT (10%)</span><span>Rs. {tax.toFixed(2)}</span>
-            </div>
             <div className="total-line grand-total">
-              <span>Grand Total:</span>
-              <span>Rs. {grandTotal.toFixed(2)}</span>
+              <span>Total:</span>
+              <span>Rs. {total.toFixed(2)}</span>
             </div>
           </div>
 
@@ -82,9 +78,7 @@ const ConfirmPage = ({ items, onConfirm, onCancel, onClose }) => {
 
       {showPaymentMethod && (
         <PaymentMethod
-          totalAmount={grandTotal}
-          subtotal={subtotal}
-          taxAmount={tax}
+          totalAmount={total}
           items={selectedItems}
           onPaymentComplete={(method, amount) => {
             setShowPaymentMethod(false);
