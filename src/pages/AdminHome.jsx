@@ -204,7 +204,7 @@ const AdminHome = () => {
         slot:        formData.slot,
         name:        formData.name,
         quantity:    parseInt(formData.quantity) || 0,
-        price:       parseFloat(formData.price) || 0,
+        price:       Math.round(parseFloat(formData.price) * 100) / 100,
         description: formData.description,
         images:      finalImages,
       };
