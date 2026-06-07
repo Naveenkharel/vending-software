@@ -355,3 +355,12 @@
     font-size: 20px;
   }
 }
+/* ── Subtotal / tax rows ── */
+.subtotal-line {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 15px;
+  color: #4a5568;
+  padding: 4px 20px;
+}

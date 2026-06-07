@@ -1,0 +1,101 @@
+/* PaymentSuccess.css — shared by PaymentSuccess and PaymentFailure */
+.payment-result-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.payment-result-card {
+  background: white;
+  border-radius: 20px;
+  padding: 50px 40px;
+  max-width: 460px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Spinner for verifying state */
+.result-spinner {
+  width: 56px;
+  height: 56px;
+  border: 5px solid #e2e8f0;
+  border-top-color: #4a7c59;
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+  margin: 0 auto 24px;
+}
+
+/* Icons */
+.result-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  font-size: 2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24px;
+  animation: scaleIn 0.4s ease;
+}
+
+.success-icon {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.fail-icon {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.payment-result-card h2 {
+  font-size: 1.7rem;
+  margin: 0 0 12px;
+  color: #2d3748;
+}
+
+.payment-result-card p {
+  color: #718096;
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.txn-id {
+  font-size: 0.85rem !important;
+  background: #f7fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 10px 16px;
+  margin: 16px 0 !important;
+  word-break: break-all;
+  color: #4a5568 !important;
+}
+
+.result-btn {
+  margin-top: 28px;
+  padding: 13px 40px;
+  background: linear-gradient(135deg, #4a7c59 0%, #2d5016 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.result-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(74, 124, 89, 0.3);
+}
+
+@keyframes spin    { to { transform: rotate(360deg); } }
+@keyframes popIn   { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+@keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
