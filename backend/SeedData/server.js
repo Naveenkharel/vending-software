@@ -8,7 +8,9 @@ import { createRequire } from 'module';  // needed ONLY to load the JSON key fil
 
 // ── Load service account key (JSON import via createRequire for ESM compat) ──
 const require = createRequire(import.meta.url);
-const serviceAccount = require('./serviceAccountKey.json');
+const serviceAccount = JSON.parse(
+  process.env.FIREBASE_SERVICE_ACCOUNT
+);
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
