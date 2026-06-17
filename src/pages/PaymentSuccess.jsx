@@ -43,7 +43,15 @@ const PaymentSuccess = () => {
 
   useEffect(() => {
     const verify = async () => {
-      const encodedData = searchParams.get('data');
+      let encodedData = searchParams.get('data');
+
+      // URLSearchParams decodes '+' as a space (it follows the
+      // application/x-www-form-urlencoded spec). eSewa's `data` value is
+      // raw base64, which very often contains '+', so without this fix
+      // the payload gets corrupted and verification fails almost every time.
+      if (encodedData) {
+        encodedData = encodedData.replace(/ /g, '+');
+      }
 
       if (!encodedData) {
         setStage('failed');
