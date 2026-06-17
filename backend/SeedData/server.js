@@ -28,7 +28,7 @@ const ESEWA_CONFIG = {
   productCode: 'EPAYTEST',
   secretKey:   '8gBm/:&EnhH.1/q',
   paymentUrl:  'https://rc-epay.esewa.com.np/api/epay/main/v2/form',
-  verifyUrl:   'https://rc-epay.esewa.com.np/api/epay/transaction/status/',
+  verifyUrl:   'https://uat.esewa.com.np/api/epay/transaction/status/',
   // --- LIVE ---
   // productCode: process.env.ESEWA_PRODUCT_CODE,
   // secretKey:   process.env.ESEWA_SECRET_KEY,
